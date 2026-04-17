@@ -37,6 +37,8 @@ class FrameBuffer
 
     void            deactivate();
     void            write(const void* image_bits);
+    void*           lockFrameBuffer();
+    void            unlockFrameBuffer();
     void            transferToDIB(void* image_bits, uint64_t* out_frame_counter);
     bool            waitForNewFrame(uint64_t frame_counter, float time_out = 0.5f);
 

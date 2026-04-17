@@ -234,6 +234,20 @@ void FrameBuffer::write(const void* image_bits)
     frame->m_frame_counter += 1;
 }
 
+void* FrameBuffer::lockFrameBuffer()
+{
+    if (!m_shmem) return nullptr;
+    m_mutex.lock();
+    return header()->imageData();
+}
+
+void FrameBuffer::unlockFrameBuffer()
+{
+    if (!m_shmem) return;
+    header()->m_frame_counter += 1;
+    m_mutex.unlock();
+}
+
 void FrameBuffer::transferToDIB(void* image_bits, uint64_t* out_frame_counter)
 {
     if (!m_shmem)

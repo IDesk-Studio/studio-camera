@@ -195,3 +195,13 @@ extern "C" bool     scIsConnected(scCamera camera)
 {
     return softcam::sender::IsConnected(camera);
 }
+
+extern "C" void*    scLockFrameBuffer(scCamera camera)
+{
+    return softcam::sender::LockFrameBuffer(camera);
+}
+
+extern "C" void     scUnlockFrameBuffer(scCamera camera)
+{
+    return softcam::sender::UnlockFrameBuffer(camera);
+}

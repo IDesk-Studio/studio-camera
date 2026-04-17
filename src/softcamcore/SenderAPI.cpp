@@ -92,6 +92,25 @@ void            SendFrame(CameraHandle camera, const void* image_bits)
     }
 }
 
+void*           LockFrameBuffer(CameraHandle camera)
+{
+    Camera* target = static_cast<Camera*>(camera);
+    if (target && s_camera.load() == target)
+    {
+        return target->m_frame_buffer.lockFrameBuffer();
+    }
+    return nullptr;
+}
+
+void            UnlockFrameBuffer(CameraHandle camera)
+{
+    Camera* target = static_cast<Camera*>(camera);
+    if (target && s_camera.load() == target)
+    {
+        target->m_frame_buffer.unlockFrameBuffer();
+    }
+}
+
 bool            WaitForConnection(CameraHandle camera, float timeout)
 {
     Camera* target = static_cast<Camera*>(camera);

@@ -82,4 +82,18 @@ extern "C"
         the virtual camera. Otherwise, it returns `false`.
     */
     bool        SOFTCAM_API scIsConnected(scCamera camera);
+
+    /*
+        Zero-copy frame write API. Instead of memcpy through scSendFrame,
+        lock shared memory → write directly → unlock.
+
+        scLockFrameBuffer returns a pointer to the shared memory buffer
+        (NV12 layout: Y plane w*h bytes + UV plane w*h/2 bytes).
+        Write frame data directly to this pointer, then call scUnlockFrameBuffer.
+
+        While locked, DShow consumer waits. Keep lock time minimal.
+        Returns nullptr if camera not created or error.
+    */
+    void*       SOFTCAM_API scLockFrameBuffer(scCamera camera);
+    void        SOFTCAM_API scUnlockFrameBuffer(scCamera camera);
 }
