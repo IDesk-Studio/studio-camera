@@ -30,7 +30,7 @@ namespace {
 
 // Setup data
 
-const wchar_t FILTER_NAME[] = L"DirectShow Softcam";
+const wchar_t FILTER_NAME[] = L"VideoLab Virtual Camera";
 const GUID &FILTER_CLASSID = CLSID_DShowSoftcam;
 
 const AMOVIESETUP_MEDIATYPE s_pin_types[] =
