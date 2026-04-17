@@ -97,8 +97,8 @@ AM_MEDIA_TYPE* allocateMediaType()
 
 std::size_t calcDIBSize(int width, int height)
 {
-    // BGRA32: 4 bytes per pixel, always aligned (no padding needed)
-    return static_cast<std::size_t>(width) * 4 * static_cast<unsigned>(height);
+    // NV12: 12 bits per pixel = 1.5 bytes. Y plane (w*h) + UV plane (w*h/2)
+    return static_cast<std::size_t>(width) * static_cast<unsigned>(height) * 3 / 2;
 }
 
 void fillMediaType(AM_MEDIA_TYPE* amt, int width, int height, float framerate)
@@ -121,12 +121,12 @@ void fillMediaType(AM_MEDIA_TYPE* amt, int width, int height, float framerate)
     pFormat->bmiHeader.biWidth = width;
     pFormat->bmiHeader.biHeight = height;
     pFormat->bmiHeader.biPlanes = 1;
-    pFormat->bmiHeader.biBitCount = 32;
-    pFormat->bmiHeader.biCompression = BI_RGB;
+    pFormat->bmiHeader.biBitCount = 12;
+    pFormat->bmiHeader.biCompression = MAKEFOURCC('N','V','1','2');
     pFormat->bmiHeader.biSizeImage = static_cast<uint32_t>(calcDIBSize(width, height));
 
     amt->majortype = MEDIATYPE_Video;
-    amt->subtype = MEDIASUBTYPE_RGB32;
+    amt->subtype = MEDIASUBTYPE_NV12;
     amt->bFixedSizeSamples = TRUE;
     amt->bTemporalCompression = FALSE;
     amt->lSampleSize = static_cast<uint32_t>(calcDIBSize(width, height));
@@ -208,7 +208,7 @@ Softcam::SetFormat(AM_MEDIA_TYPE *mt)
         return E_FAIL;
     }
     if (mt->majortype != MEDIATYPE_Video ||
-        mt->subtype != MEDIASUBTYPE_RGB32)
+        mt->subtype != MEDIASUBTYPE_NV12)
     {
         LOG("-> E_FAIL (invalid media type)\n");
         return E_FAIL;

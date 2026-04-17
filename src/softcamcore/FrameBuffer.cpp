@@ -110,7 +110,7 @@ FrameBuffer FrameBuffer::open()
             fb.m_shmem = {};
             return fb;
         }
-        uint32_t image_size = (uint32_t)frame->m_width * (uint32_t)frame->m_height * 4;
+        uint32_t image_size = (uint32_t)frame->m_width * (uint32_t)frame->m_height * 3 / 2;
         if (size <= frame->m_image_offset ||
             size - frame->m_image_offset < image_size)
         {
@@ -230,7 +230,7 @@ void FrameBuffer::write(const void* image_bits)
     std::memcpy(
             frame->imageData(),
             image_bits,
-            (std::size_t)4 * frame->m_width * frame->m_height);
+            (std::size_t)frame->m_width * frame->m_height * 3 / 2);
     frame->m_frame_counter += 1;
 }
 
@@ -247,15 +247,12 @@ void FrameBuffer::transferToDIB(void* image_bits, uint64_t* out_frame_counter)
     {
         int w = frame->m_width;
         int h = frame->m_height;
-        // BGRA32: 4 bytes/pixel, always 4-byte aligned, no gap needed
+        // NV12: top-down planar format, no flip needed (unlike bottom-up RGB).
+        // Y plane: w*h bytes, UV plane: w*h/2 bytes (interleaved U,V).
+        // Direct memcpy — consumer expects contiguous Y+UV.
+        uint32_t image_size = (uint32_t)w * h * 3 / 2;
         const std::uint8_t* image = frame->imageData();
-        std::uint8_t* dest = (std::uint8_t*)image_bits;
-        for (int y = 0; y < h; y++)
-        {
-            const std::uint8_t* src = image + 4 * w * (h - 1 - y);
-            std::memcpy(dest, src, 4 * (uint32_t)w);
-            dest += 4 * w;
-        }
+        std::memcpy(image_bits, image, image_size);
         *out_frame_counter = frame->m_frame_counter;
     }
 }
@@ -317,7 +314,7 @@ uint32_t FrameBuffer::calcMemorySize(
                         uint16_t height)
 {
     uint32_t header_size = sizeof(Header);
-    uint32_t image_size = (uint32_t)width * height * 4;
+    uint32_t image_size = (uint32_t)width * height * 3 / 2;
     uint32_t shmem_size = header_size + image_size;
     return shmem_size;
 }
